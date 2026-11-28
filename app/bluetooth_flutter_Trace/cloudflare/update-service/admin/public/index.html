@@ -279,14 +279,15 @@
 
         <div class="app-tabs" id="appTabs" role="tablist" aria-label="App management" data-i18n-aria-label="app.management">
           <button type="button" id="appReleasesTab" role="tab" data-app-section="releases" aria-controls="appReleasesPanel" aria-selected="true" data-i18n="app.versions">Versions</button>
+          <button type="button" id="appChannelsTab" role="tab" data-app-section="channels" aria-controls="appChannelsPanel" aria-selected="false" tabindex="-1" data-i18n="channels.title">Channels</button>
           <button type="button" id="appAnnouncementsTab" role="tab" data-app-section="announcements" aria-controls="announcements" aria-selected="false" tabindex="-1" data-i18n="announcements.title">Announcements</button>
           <button type="button" id="appInventoryTab" role="tab" data-app-section="inventory" aria-controls="appInventoryPanel" aria-selected="false" tabindex="-1" data-i18n="operations.inventoryTab">Distribution</button>
           <button type="button" id="appFeedbackTab" role="tab" data-app-section="feedback" aria-controls="appFeedbackPanel" aria-selected="false" tabindex="-1" data-i18n="app.feedback">Feedback</button>
         </div>
-        <section class="app-panel" id="appReleasesPanel" data-app-panel="releases" role="tabpanel" aria-labelledby="appReleasesTab">
-        <div class="operations-buttons app-platform-bar"><label id="appPlatformLabel" for="appPlatform">Platform</label>
+        <div class="operations-buttons app-platform-bar" id="appPlatformBar"><label id="appPlatformLabel" for="appPlatform">Platform</label>
           <select id="appPlatform"><option value="android">Android</option><option value="windows">Windows</option><option value="ios">iOS</option></select>
           <span id="appPlatformHint" class="firmware-hint"></span></div>
+        <section class="app-panel" id="appReleasesPanel" data-app-panel="releases" role="tabpanel" aria-labelledby="appReleasesTab">
         <section class="filters" aria-label="Release filters" data-i18n-aria-label="filters.releaseFilters">
           <div>
             <p class="field-label"><svg class="ui-icon" aria-hidden="true"><use href="#i-filter"></use></svg><span class="label-text" data-i18n="filters.title">Filters</span></p>
@@ -405,6 +406,14 @@
           </aside>
         </section>
 
+        </section>
+        <section class="panel" id="appChannelsPanel" data-app-panel="channels" role="tabpanel" aria-labelledby="appChannelsTab" hidden>
+          <header class="panel-head"><div>
+            <h2 data-i18n="channels.title">Channels</h2>
+            <p data-i18n="channels.rollbackHint">Retraction moves the channel to the selected older version. Already-updated clients will not downgrade.</p>
+          </div></header>
+          <p class="firmware-hint" id="appChannelsNotice" role="status" hidden></p>
+          <div class="firmware-channel-list" id="appChannelList"></div>
         </section>
         <section class="panel announcement-panel" id="announcements" data-app-panel="announcements" role="tabpanel" aria-labelledby="appAnnouncementsTab" hidden>
           <header class="panel-head">
@@ -607,6 +616,8 @@
         announcementOpen: false,
         session: null,
         channels: [],
+        appRetractTargets: new Map(),
+        appReconcileRequired: true,
         releases: [],
         announcements: [],
         announcementsError: null,
@@ -640,7 +651,7 @@
         firmwareDetailsOpen: false,
         accountDetailsOpen: false,
         detailsOpen: false,
-        queries: { releases: "", announcements: "", firmware: "", firmwareChannels: "", firmwareHistory: "", inventory: "", firmwareInventory: "", feedback: "", accounts: "" },
+        queries: { releases: "", channels: "", announcements: "", firmware: "", firmwareChannels: "", firmwareHistory: "", inventory: "", firmwareInventory: "", feedback: "", accounts: "" },
         inventory: { value: null, error: null, loading: false, window: 30, pages: { android: 0, firmware: 0 }, refreshId: null },
         inventoryDetails: [],
         delta: null,
@@ -1031,6 +1042,17 @@
           "channels.noRelease": "No release",
           "channels.revision": "Revision",
           "channels.selected": "selected",
+          "channels.title": "Channels",
+          "channels.rollbackHint": "Retraction moves the channel to the selected older version. Already-updated clients will not downgrade.",
+          "channels.retractTarget": "Return to version",
+          "channels.chooseTarget": "Select an older version",
+          "channels.noTargets": "No eligible older versions",
+          "channels.targetHint": "Eligible targets from the latest 50 available versions on this platform.",
+          "channels.retractStable": "Retract Stable",
+          "channels.retractBeta": "Retract Beta",
+          "channels.refreshRequired": "Refresh channel and version data before another operation. No write is retried automatically.",
+          "channels.refreshFailed": "The server confirmed the change, but the refreshed state is unavailable. Refresh before another operation.",
+          "search.appChannels": "Search App channels or current versions...",
           "role.viewer": "viewer",
           "role.publisher": "publisher",
           "role.owner": "owner",
@@ -1396,6 +1418,17 @@
           "channels.noRelease": "无版本",
           "channels.revision": "修订号",
           "channels.selected": "已选中",
+          "channels.title": "发布渠道",
+          "channels.rollbackHint": "撤回会将渠道切换到所选旧版本，已安装新版的客户端不会降级。",
+          "channels.retractTarget": "退回目标版本",
+          "channels.chooseTarget": "请选择要退回的旧版本",
+          "channels.noTargets": "暂无可用的旧版本",
+          "channels.targetHint": "候选来自当前平台最近 50 个可用版本。",
+          "channels.retractStable": "撤回 Stable",
+          "channels.retractBeta": "撤回 Beta",
+          "channels.refreshRequired": "请先刷新渠道与版本状态，再操作；不会自动重试撤回。",
+          "channels.refreshFailed": "服务器已确认变更，但刷新状态失败，请刷新后再操作。",
+          "search.appChannels": "搜索 App 渠道或当前版本...",
           "role.viewer": "查看者",
           "role.publisher": "发布者",
           "role.owner": "所有者",
@@ -1562,6 +1595,8 @@
         topbar: document.querySelector(".topbar"),
         appTabs: document.querySelector("#appTabs"),
         appPanels: document.querySelectorAll("[data-app-panel]"),
+        appChannelList: document.querySelector("#appChannelList"),
+        appChannelsNotice: document.querySelector("#appChannelsNotice"),
         firmwareTabs: document.querySelector("#firmwareTabs"),
         firmwarePanels: document.querySelectorAll("[data-firmware-panel]"),
         workspace: document.querySelector(".workspace"),
@@ -1774,12 +1809,28 @@
       document.querySelector("#appPlatform").addEventListener("change", async event => {
         if (state.busy) { event.target.value = state.appPlatform; return; }
         state.appPlatform = event.target.value;
+        state.appRetractTargets.clear();
+        state.appReconcileRequired = true;
         state.deleteModes.app = false;
         state.selectedVersions.clear(); state.selectedReleaseId = null; state.releasePage = 0;
         state.releases = []; state.channels = []; state.storage = null;
         render(); await loadAll();
       });
       document.addEventListener("change", event => {
+        if (event.target.matches("[data-app-retract-target]")) {
+          const select = event.target;
+          const channel = state.channels.find(row => row.name === select.dataset.appRetractTarget);
+          if (!channel || select.disabled || state.busy || activeConfirmDialog || state.appReconcileRequired
+              || !canRole(channel.name === "stable" ? "owner" : "publisher")) return;
+          if (select.value && !appRetractCandidates(channel).some(row => row.id === select.value)) return;
+          if (select.value) state.appRetractTargets.set(channel.name, {
+            releaseId: select.value, actor: state.session.actor, platform: state.appPlatform
+          });
+          else state.appRetractTargets.delete(channel.name);
+          renderAppChannels();
+          els.appChannelList.querySelector(`[data-app-retract-target="${channel.name}"]`)?.focus({ preventScroll: true });
+          return;
+        }
         if (event.target.matches("[data-firmware-retract-target]")) {
           const select = event.target;
           const channel = state.firmwareChannels.find(row => row.channel === select.dataset.firmwareRetractTarget);
@@ -1927,6 +1978,7 @@
         } else {
           if(state.appPlatform!==kind) {
             state.appPlatform=kind;state.selectedVersions.clear();
+            state.appRetractTargets.clear();
             await loadAll();
             if(actor!==state.session?.actor || generation!==state.candidateNavigation) return false;
           }
@@ -2012,7 +2064,7 @@
         els.appTabs.addEventListener("keydown", event => {
           if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
           event.preventDefault();
-          const sections = ["releases", "announcements", "inventory", "feedback"];
+          const sections = ["releases", "channels", "announcements", "inventory", "feedback"];
           const index = sections.indexOf(state.appSection);
           switchAppSection(event.key === "Home" ? sections[0] : event.key === "End" ? sections.at(-1)
             : sections[(index + (event.key === "ArrowLeft" ? sections.length - 1 : 1)) % sections.length]);
@@ -2187,6 +2239,14 @@
             if (action === "delete") { runFirmwareDelete(firmwareId); return; }
             if (["disable", "recovery-download"].includes(action)) runFirmwareReleaseAction(firmwareId, action);
             else runFirmwareChannelAction(firmwareButton.dataset.channel, action, firmwareId);
+            return;
+          }
+          const retractButton = target.closest("button[data-app-retract]");
+          if (retractButton) {
+            if (retractButton.disabled || state.busy || activeConfirmDialog || state.appReconcileRequired) return;
+            const channel = state.channels.find(row => row.name === retractButton.dataset.appRetract);
+            const release = appRetractTarget(channel);
+            if (release) publishRelease(channel.name, release.id, { retract: true });
             return;
           }
           const button = target.closest("button[data-action]");
@@ -2591,6 +2651,7 @@
 
       async function loadAll() {
         const loadGeneration = ++state.appLoadGeneration, platform = state.appPlatform;
+        state.appReconcileRequired = true;
         setBusy(true, "status.loadingReleaseData");
         try {
           const session = await readAdminSession();
@@ -2600,6 +2661,7 @@
             els.inventoryDetailSheet.hidden = true; els.inventoryDetailBackdrop.hidden = true;
             state.selectedVersions.clear(); state.selectedFirmwareVersions.clear();
             state.firmwareRetractTargets.clear();
+            state.appRetractTargets.clear();
             state.selectedAnnouncements.clear(); state.deleteModes = { app:false, firmware:false, announcements:false };
             state.appNoteDrafts.clear();
             state.announcementDrafts.clear();
@@ -2622,6 +2684,7 @@
           if (loadGeneration !== state.appLoadGeneration || platform !== state.appPlatform) return;
           state.channels = channels.channels ?? [];
           state.releases = releases.releases ?? [];
+          state.appReconcileRequired = false;
           state.storage = storage.error ? null : storage.storage ?? null;
           state.storageError = storage.error ?? null;
           state.announcements = announcements.error ? [] : announcements.announcements ?? [];
@@ -2643,6 +2706,7 @@
           else clearFeedbackError("load-partial");
           setStatus(state.firmwareError ? "firmware.loadFailed" : "status.operational", state.firmwareError ? "warn" : "ok");
         } catch (error) {
+          state.appReconcileRequired = true;
           state.firmwareReconcileRequired = true;
           renderError(error);
           setStatus(error.message, "error");
@@ -2672,11 +2736,14 @@
         return release.version_code < channelRow.version_code ? "rollback" : "publish";
       }
 
-      async function publishRelease(channel, releaseId) {
+      async function publishRelease(channel, releaseId, { retract = false } = {}) {
         const release = state.releases.find((item) => item.id === releaseId);
         const channelRow = state.channels.find((item) => item.name === channel);
         const mode = appChannelMode(release, channelRow);
-        if (!mode || state.busy || !canRole(channel === "stable" ? "owner" : "publisher")) return;
+        if (!mode || state.busy || activeConfirmDialog || state.appReconcileRequired
+            || !canRole(channel === "stable" ? "owner" : "publisher")
+            || (retract && (mode !== "rollback" || appRetractTarget(channelRow)?.id !== releaseId))) return;
+        const actor = state.session?.actor, platform = state.appPlatform, generation = state.appLoadGeneration;
         const rollback = mode === "rollback";
         const channelText = channelLabel(channel);
         const actionLabel = t(`actions.${rollback ? "rollback" : "publish"}${channel === "stable" ? "Stable" : "Beta"}`);
@@ -2702,6 +2769,8 @@
           setStatus("status.stableCancelled", "warn");
           return;
         }
+        if (actor !== state.session?.actor || platform !== state.appPlatform || generation !== state.appLoadGeneration
+            || state.appReconcileRequired || (retract && appRetractTarget(channelRow)?.id !== releaseId)) return;
         setBusy(true, rollback ? "status.rollingBack" : "status.publishing", { tag: release.release_tag, channel: channelText });
         try {
           const result = await mutate(`/api/admin/channels/${channel}/publish`, {
@@ -2711,12 +2780,16 @@
             expectedRevision: Number(channelRow.revision),
             rollback
           });
-          const detail = t(rollback ? "status.rolledBack" : "status.published", {
+          if (result.ok !== true || result.revision !== Number(channelRow.revision) + 1) {
+            throw new Error(t("channels.refreshRequired"));
+          }
+          let detail = t(rollback ? "status.rolledBack" : "status.published", {
             tag: release.release_tag,
             channel: channelText,
             revision: result.revision
           });
           await loadAll();
+          if (state.appReconcileRequired) detail += `\n${t("channels.refreshFailed")}`;
           await openResultDialog({
             tone: channel === "stable" ? "stable" : "success",
             icon: channel === "stable" ? "i-stable" : "i-beta",
@@ -2726,13 +2799,14 @@
             confirmClass: channel === "stable" ? "stable" : "primary"
           });
         } catch (error) {
+          state.appReconcileRequired = true;
           setStatus(error.message, "error");
           await openResultDialog({
             tone: "danger",
             icon: channel === "stable" ? "i-stable" : "i-beta",
             title: t(rollback ? "result.rollbackFailureTitle" : "result.publishFailureTitle"),
             message: t(rollback ? "result.rollbackFailure" : "result.publishFailure", { tag: release.release_tag, channel: channelText }),
-            detail: error.message,
+            detail: `${error.message}\n${t("channels.refreshRequired")}`,
             confirmClass: "danger"
           });
         } finally {
@@ -3694,6 +3768,7 @@
         renderAnnouncements();
         renderStorage();
         renderChannels(detailRelease);
+        renderAppChannels();
         renderFirmware();
         renderInventory("android"); renderInventory("firmware");
         renderInventoryDetails();
@@ -4188,6 +4263,59 @@
         return escapeHtml(value)
           .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
           .replace(/`([^`]+)`/g, "<code>$1</code>");
+      }
+
+      function appRetractCandidates(channel) {
+        if (!channel || !["stable", "beta"].includes(channel.name) || channel.app_id !== "trace"
+            || channel.platform !== state.appPlatform || !["android", "windows"].includes(channel.platform)) return [];
+        return state.releases.filter(release => release.app_id === channel.app_id && release.platform === channel.platform
+          && appChannelMode(release, channel) === "rollback" && String(release.release_notes ?? "").trim()
+          && Number(release.asset_count) > 0 && Number(release.r2_available_count) === Number(release.asset_count)
+          && Number(release.installer_size_bytes) > 0)
+          .sort((left, right) => right.version_code - left.version_code || left.id.localeCompare(right.id));
+      }
+
+      function appRetractTarget(channel) {
+        const target = state.appRetractTargets.get(channel?.name);
+        return target?.actor === state.session?.actor && target?.platform === state.appPlatform
+          ? appRetractCandidates(channel).find(row => row.id === target.releaseId) : null;
+      }
+
+      function renderAppChannels() {
+        for (const [name] of state.appRetractTargets) {
+          if (!appRetractTarget(state.channels.find(row => row.name === name))) state.appRetractTargets.delete(name);
+        }
+        els.appChannelsNotice.hidden = !state.appReconcileRequired || state.busy;
+        els.appChannelsNotice.textContent = t("channels.refreshRequired");
+        const query = state.queries.channels.toLocaleLowerCase();
+        const channels = state.channels.filter(channel => ["stable", "beta"].includes(channel.name)
+          && channel.app_id === "trace" && channel.platform === state.appPlatform
+          && [channel.name, channelLabel(channel.name), channel.release_tag, channel.version_name, channel.platform]
+            .join(" ").toLocaleLowerCase().includes(query));
+        els.appChannelList.innerHTML = channels.map(channel => {
+          const candidates = appRetractCandidates(channel), selected = appRetractTarget(channel);
+          const unlocked = !state.busy && !state.appReconcileRequired
+            && canRole(channel.name === "stable" ? "owner" : "publisher");
+          return `<article class="firmware-channel-card" data-app-channel="${escapeHtml(channel.name)}">
+            <div class="firmware-card-top"><div><h3>${escapeHtml(channelLabel(channel.name))}</h3>
+              <p>${escapeHtml(channel.platform)}</p></div>
+              <span class="tag ${escapeHtml(channel.name)}">${escapeHtml(t("channels.revision"))} ${escapeHtml(channel.revision)}</span></div>
+            <div class="firmware-meta-grid">
+              ${firmwareMeta(t("firmware.current"), channel.release_tag || t("channels.noRelease"))}
+              ${firmwareMeta(t("firmware.versionCode"), channel.version_code ?? "--")}
+              ${firmwareMeta(t("firmware.latestSwitch"), t(Number(channel.disable_latest) === 1 ? "firmware.stopped" : "firmware.enabled"))}
+            </div>
+            <label class="firmware-field firmware-retract-target" for="appRetract-${escapeHtml(channel.name)}">
+              <span>${escapeHtml(t("channels.retractTarget"))}</span>
+              <select id="appRetract-${escapeHtml(channel.name)}" data-app-retract-target="${escapeHtml(channel.name)}"
+                title="${escapeHtml(selected?.release_tag ?? t("channels.targetHint"))}" ${unlocked && candidates.length ? "" : "disabled"}>
+                <option value="">${escapeHtml(t(candidates.length ? "channels.chooseTarget" : "channels.noTargets"))}</option>
+                ${candidates.map(row => `<option value="${escapeHtml(row.id)}" ${row.id === selected?.id ? "selected" : ""}>${escapeHtml(row.version_name)} / versionCode ${escapeHtml(row.version_code)}</option>`).join("")}
+              </select></label>
+            <div class="firmware-actions"><button type="button" class="pill-button" data-app-retract="${escapeHtml(channel.name)}"
+              ${unlocked && selected ? "" : "disabled"}>${escapeHtml(t(channel.name === "stable" ? "channels.retractStable" : "channels.retractBeta"))}</button></div>
+          </article>`;
+        }).join("") || `<div class="empty">${escapeHtml(t(state.channels.length ? "timeline.noMatches" : "empty.noChannels"))}</div>`;
       }
 
       function renderChannels(selected) {
@@ -4842,7 +4970,7 @@
         document.querySelectorAll("[data-action='publish']").forEach((button) => {
           const channel = button.dataset.channel;
           const mode = appChannelMode(release, state.channels.find((item) => item.name === channel));
-          button.disabled = state.busy || !mode || !canRole(channel === "stable" ? "owner" : "publisher");
+          button.disabled = state.busy || state.appReconcileRequired || !mode || !canRole(channel === "stable" ? "owner" : "publisher");
           const label = button.querySelector(".action-copy strong");
           const hint = button.querySelector(".action-copy span");
           label.textContent = mode === "rollback"
@@ -5193,6 +5321,7 @@
         if (message) setStatus(message, "info", { values });
         renderActionLocks(activeReleaseForAction());
         renderTimeline(filteredReleases(),state.releases.find(row=>row.id===state.selectedReleaseId));
+        renderAppChannels();
         renderFirmware();
         setAnnouncementEditorEnabled(!state.announcementsError);
         renderAnnouncementActions();
@@ -5300,14 +5429,14 @@
       function syncSearchInput() {
         const scope = searchScope();
         els.searchInput.value = state.queries[scope];
-        const label = t({ accounts: "search.accounts", feedback: "search.feedback", announcements: "search.announcements", firmware: "search.firmware",
+        const label = t({ accounts: "search.accounts", feedback: "search.feedback", channels: "search.appChannels", announcements: "search.announcements", firmware: "search.firmware",
           firmwareChannels: "search.firmwareChannels", firmwareHistory: "search.firmwareHistory", inventory: "operations.search", firmwareInventory: "operations.search" }[scope] ?? "search.placeholder");
         els.searchInput.placeholder = label;
         els.searchInput.setAttribute("aria-label", label);
       }
 
       function switchAppSection(section) {
-        if (!["releases", "announcements", "inventory", "feedback"].includes(section)) return;
+        if (!["releases", "channels", "announcements", "inventory", "feedback"].includes(section)) return;
         if(state.appSection!==section) resetDeletionModes();
         state.appSection = section;
         render();
@@ -5331,6 +5460,7 @@
       }
 
       function applyAppSection() {
+        document.querySelector("#appPlatformBar").hidden = !["releases", "channels"].includes(state.appSection);
         els.appPanels.forEach(panel => { panel.hidden = panel.dataset.appPanel !== state.appSection; });
         els.appTabs.querySelectorAll("[data-app-section]").forEach(tab => {
           const active = tab.dataset.appSection === state.appSection;

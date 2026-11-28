@@ -255,6 +255,20 @@ downgrade and need a higher `versionCode` for a corrective update. A failed or
 uncertain rollback is never automatically repeated; refresh before confirming
 a new intent.
 
+App management also exposes an independent Channels tab. Choose Android or
+Windows, then explicitly select a return version in the Stable or Beta card and
+press Retract. The two target selectors are independent of release-list selection,
+filters and pagination; neither silently selects a default. Eligible targets come
+from the existing bounded latest-50 catalogue: an older version on the same
+platform with available assets, an installer, saved notes and no disabled/archive
+state. iOS distribution remains unconfigured and has no retraction action.
+Selections are actor/platform scoped and cleared when invalidated by a refresh.
+The existing confirmation, Stable typed phrase, CSRF renewal, role checks and CAS
+endpoint are reused without a new API or schema. A read failure, conflict or
+unconfirmed write locks further channel operations until an explicit refresh;
+no mutation is automatically replayed. Publication from version details remains
+available and forward publication still sends `rollback: false`.
+
 ## Firmware Controls
 
 The firmware tab consumes the multi-asset DTOs defined by
@@ -516,6 +530,9 @@ populated long-text layouts in both languages at 1440, 1024, 768, 390 and 320 px
 `test/app-ui.spec.ts` additionally covers explicit App rollback versus forward
 publish, bilingual labels, cancellation without a POST, stable typed confirmation,
 role and unavailable-target locks, CAS without replay, and mobile confirmation.
+The Channels entry additionally covers independent target selection, platform
+and actor isolation, failed refreshes, current/invalid target removal, and long
+content at 320px with enlarged text, including focus restoration after cancel.
 Design regressions cover shared styles, bilingual long-text layout, modal focus
 and cancellation, reason newlines, App draft retention/isolation, mobile version
 navigation, floating resources and reduced motion. Interaction regressions cover

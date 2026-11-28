@@ -290,12 +290,13 @@ function release(id: string, versionCode: number) {
     version_name: `1.0.${versionCode - 26}`, release_tag: `mock-app-${versionCode}`,
     state: "candidate", archived: 0, fallback_only: 0, release_notes: "Synthetic App browser fixture",
     created_at: "2026-11-08T00:00:00Z", published_channels: "", asset_count: 2,
-    r2_available_count: 2, apk_count: 1, manifest_count: 1, patch_count: 0 };
+    r2_available_count: 2, installer_size_bytes: 41943040, apk_count: 1, manifest_count: 1, patch_count: 0 };
 }
 
 async function mockApp(page: Page, language = "en", role = "owner", firmwareFailure = false) {
   const data = {
-    role, conflict: false, notesFailure: false, announcementFailure: false, mutations: 0, firmwareFailure,
+    role, actor: null as string | null, conflict: false, appReadFailure: false,
+    notesFailure: false, announcementFailure: false, mutations: 0, firmwareFailure,
     accountReadFailure: false, accountSaveFailure: false, accountMalformed: false,
     accountReadGate: null as Promise<void> | null,
     accountRows: 1, accountDetailRows: 1, accountLongText: false,
@@ -373,10 +374,10 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
           logins: [{ occurred_at: 1795300000000, app_version: 'test' }] }); return;
       }
       if (url.pathname === "/api/admin/session") {
-        await reply({ ok: true, appId: "trace", environment: "MOCK", actor: `${data.role}@example.test`, role: data.role, csrfToken: "mock-csrf" }); return;
+        await reply({ ok: true, appId: "trace", environment: "MOCK", actor: data.actor ?? `${data.role}@example.test`, role: data.role, csrfToken: "mock-csrf" }); return;
       }
       if (url.pathname === "/api/admin/delta/activity") {
-        await reply({ ok: true, actor: `${data.role}@example.test`, scope: "own-jobs", jobs: [], notifications: [],
+        await reply({ ok: true, actor: data.actor ?? `${data.role}@example.test`, scope: "own-jobs", jobs: [], notifications: [],
           unreadCount: 0, pushPublicKey: null, pushSubscriptions: [] }); return;
       }
       if (url.pathname === "/api/admin/resource-usage") {
@@ -388,7 +389,13 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
         }
         await reply({ ok: true, requestId, firmwareChannels: [], firmwareReleases: [] }); return;
       }
-      await reply({ ok: true, channels: data.channels, releases: data.releases, announcements: data.announcements, storage: { r2: { totalSizeBytes: 83886080, objectCount: 6, byType: [] }, tracked: { releaseCount: 3, totalSizeBytes: 83886080, objectCount: 6 } } }); return;
+      if (data.appReadFailure && ["/api/admin/channels", "/api/admin/releases"].includes(url.pathname)) {
+        await fail("BACKEND_UNAVAILABLE", 503); return;
+      }
+      const platform = url.searchParams.get("platform") ?? "android";
+      await reply({ ok: true, channels: data.channels.filter(row => row.platform === platform),
+        releases: data.releases.filter(row => row.platform === platform), announcements: data.announcements,
+        storage: { r2: { totalSizeBytes: 83886080, objectCount: 6, byType: [] }, tracked: { releaseCount: 3, totalSizeBytes: 83886080, objectCount: 6 } } }); return;
     }
     expect(request.method()).toBe("POST");
     expect(request.headers()["content-type"]).toBe("application/json");
@@ -443,13 +450,14 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
     expect(url.pathname).toMatch(/^\/api\/admin\/channels\/(stable|beta)\/publish$/);
     const body = request.postDataJSON() as Record<string, unknown>;
     expect(Object.keys(body).sort()).toEqual(["appId", "expectedRevision", "platform", "releaseId", "rollback"]);
-    expect(body.appId).toBe("trace"); expect(body.platform).toBe("android");
+    expect(body.appId).toBe("trace"); expect(["android", "windows"]).toContain(body.platform);
     data.writes.push({ path: url.pathname, body });
-    const channel = data.channels.find(c => c.name === url.pathname.split("/")[4])!;
+    const channel = data.channels.find(c => c.name === url.pathname.split("/")[4] && c.platform === body.platform)!;
     if (data.role === "viewer" || (channel.name === "stable" && data.role !== "owner")) { await fail("ROLE_FORBIDDEN", 403); return; }
     if (data.conflict) { channel.revision++; data.conflict = false; await fail("CAS_CONFLICT"); return; }
     if (body.expectedRevision !== channel.revision || channel.disable_latest) { await fail("CAS_CONFLICT"); return; }
     const target = data.releases.find(r => r.id === body.releaseId)!;
+    expect(target.platform).toBe(body.platform);
     if (target.state === "disabled" || target.archived) { await fail("RELEASE_DISABLED"); return; }
     if (channel.current_release_id && target.version_code <= Number(channel.version_code) && body.rollback !== true) {
       await fail("VERSION_REGRESSION"); return;
@@ -597,6 +605,222 @@ async function closeResult(page: Page) {
   await page.locator("#confirmAccept").click();
   await expect(page.locator("#confirmDialog")).toBeHidden();
   await expect(page.locator("#refreshButton")).toBeEnabled();
+}
+
+const retractTarget = (page: Page, channel: string) => page.locator(`[data-app-retract-target="${channel}"]`);
+const retractAction = (page: Page, channel: string) => page.locator(`[data-app-retract="${channel}"]`);
+
+test("App channel retraction is independent of version selection, filters, pages and the other channel", async ({ page }) => {
+  const data = await mockApp(page);
+  data.releases.push(...Array.from({ length: 10 }, (_, i) => release(`extra-${i}`, 80 + i)));
+  await refreshApp(page);
+  await select(page, "app-new"); await closeActions(page);
+  await page.locator('#releasePageNext').click();
+  await page.locator('#searchInput').fill('mock-app-100');
+  await appTab(page, 'channels');
+  await expect(page.locator('#appChannelsPanel')).toBeVisible();
+  await expect(page.locator('#appPlatform')).toBeVisible();
+  for (const channel of ['stable', 'beta']) {
+    await expect(retractTarget(page, channel)).toHaveValue('');
+    await expect(retractAction(page, channel)).toBeDisabled();
+    await expect(retractTarget(page, channel).locator('option')).toHaveCount(12);
+    await expect(retractTarget(page, channel).locator('option[value="app-new"]')).toHaveCount(0);
+    await expect(retractTarget(page, channel).locator('option[value="app-current"]')).toHaveCount(0);
+  }
+  await retractTarget(page, 'stable').selectOption('extra-0');
+  await retractTarget(page, 'beta').selectOption('app-old');
+  await appTab(page, 'releases');
+  await expect(page.locator('#searchInput')).toHaveValue('mock-app-100');
+  await select(page, 'app-new'); await closeActions(page);
+  await appTab(page, 'channels');
+  await expect(retractTarget(page, 'stable')).toHaveValue('extra-0');
+  await expect(retractTarget(page, 'beta')).toHaveValue('app-old');
+  await page.locator('#searchInput').fill('beta');
+  await expect(page.locator('[data-app-channel]')).toHaveCount(1);
+  await retractAction(page, 'beta').click();
+  await expect(page.locator('#confirmMessage')).toContainText('mock-app-98');
+  await page.locator('#confirmCancel').click();
+  await expect(retractAction(page, 'beta')).toBeFocused();
+  expect(data.writes).toHaveLength(0);
+});
+
+for (const language of ['en', 'zh']) for (const channel of ['stable', 'beta']) {
+  test(`App channel retraction ${language} ${channel} confirms an explicit target and uses the existing API`, async ({ page }) => {
+    const data = await mockApp(page, language);
+    await appTab(page, 'channels');
+    await retractTarget(page, channel).selectOption('app-old');
+    expect(data.writes).toHaveLength(0);
+    await retractAction(page, channel).click();
+    await expect(page.locator('#confirmMessage')).toContainText('mock-app-98');
+    await expect(page.locator('#confirmDetail')).toContainText(language === 'zh' ? '已升级的客户端不会降级' : 'Already-updated clients will not downgrade');
+    if (channel === 'stable') {
+      await expect(page.locator('#confirmAccept')).toBeDisabled();
+      await page.locator('#confirmInput').fill('Stable');
+      await expect(page.locator('#confirmAccept')).toBeDisabled();
+    }
+    await page.locator('#confirmCancel').click();
+    await expect(retractAction(page, channel)).toBeFocused();
+    expect(data.writes).toHaveLength(0);
+    await retractAction(page, channel).click(); await confirm(page);
+    await expect(page.locator('#confirmTitle')).toHaveText(language === 'zh' ? '回退完成' : 'Rollback completed');
+    expect(data.writes).toEqual([{ path: `/api/admin/channels/${channel}/publish`, body: {
+      appId: 'trace', platform: 'android', releaseId: 'app-old', expectedRevision: channel === 'stable' ? 7 : 8, rollback: true
+    } }]);
+    await closeResult(page);
+    await expect(retractTarget(page, channel)).toHaveValue('');
+    await expect(retractAction(page, channel)).toBeDisabled();
+  });
+}
+
+for (const role of ['viewer', 'publisher']) {
+  test(`App channel retraction respects ${role} permissions`, async ({ page }) => {
+    const data = await mockApp(page, 'en', role);
+    await appTab(page, 'channels');
+    await expect(retractTarget(page, 'stable')).toBeDisabled();
+    await expect(retractAction(page, 'stable')).toBeDisabled();
+    if (role === 'viewer') await expect(retractTarget(page, 'beta')).toBeDisabled();
+    else {
+      await retractTarget(page, 'beta').selectOption('app-old');
+      await retractAction(page, 'beta').click(); await confirm(page);
+      await expect(page.locator('#confirmTitle')).toHaveText('Rollback completed');
+    }
+    expect(data.writes).toHaveLength(role === 'viewer' ? 0 : 1);
+  });
+}
+
+for (const condition of ['disabled', 'archived', 'no-assets', 'partial-r2', 'no-installer', 'blank-notes',
+  'equal-code', 'missing-current', 'empty-channel', 'stopped', 'wrong-platform']) {
+  test(`App channel retraction rejects unavailable targets: ${condition}`, async ({ page }) => {
+    const data = await mockApp(page);
+    const old = data.releases[2];
+    if (condition === 'disabled') old.state = 'disabled';
+    if (condition === 'archived') old.archived = 1;
+    if (condition === 'no-assets') old.asset_count = 0;
+    if (condition === 'partial-r2') old.r2_available_count = 1;
+    if (condition === 'no-installer') old.installer_size_bytes = 0;
+    if (condition === 'blank-notes') old.release_notes = '  \n ';
+    if (condition === 'equal-code') old.version_code = 99;
+    if (condition === 'wrong-platform') old.platform = 'windows';
+    if (condition === 'missing-current') for (const row of data.channels) row.current_release_id = 'missing';
+    if (condition === 'empty-channel') for (const row of data.channels) row.current_release_id = null;
+    if (condition === 'stopped') for (const row of data.channels) row.disable_latest = 1;
+    await refreshApp(page); await appTab(page, 'channels');
+    for (const channel of ['stable', 'beta']) {
+      await expect(retractTarget(page, channel)).toBeDisabled();
+      await expect(retractAction(page, channel)).toBeDisabled();
+      await expect(retractTarget(page, channel).locator('option[value="app-old"]')).toHaveCount(0);
+    }
+    expect(data.writes).toHaveLength(0);
+  });
+}
+
+test('App channel retraction invalidates a target that became current, unavailable or belongs to another actor', async ({ page }) => {
+  const data = await mockApp(page); await appTab(page, 'channels');
+  await retractTarget(page, 'stable').selectOption('app-old');
+  await retractTarget(page, 'beta').selectOption('app-old');
+  data.channels[1].current_release_id = 'app-old';
+  await refreshApp(page);
+  await expect(retractTarget(page, 'beta')).toHaveValue('');
+  await expect(retractTarget(page, 'stable')).toHaveValue('app-old');
+  data.releases[2].archived = 1;
+  await refreshApp(page);
+  await expect(retractTarget(page, 'stable')).toHaveValue('');
+  data.releases[2].archived = 0;
+  await refreshApp(page);
+  await retractTarget(page, 'stable').selectOption('app-old');
+  data.actor = 'second-owner@example.test';
+  await refreshApp(page);
+  await expect(retractTarget(page, 'stable')).toHaveValue('');
+  expect(data.writes).toHaveLength(0);
+});
+
+test('App channel retraction stays scoped to Android, Windows and unsupported iOS', async ({ page }) => {
+  const data = await mockApp(page);
+  data.releases.push(...data.releases.map(row => ({ ...row, id: 'win-' + row.id, platform: 'windows' })));
+  data.channels.push(...data.channels.map(row => ({ ...row, current_release_id: 'win-app-current', platform: 'windows' })));
+  await appTab(page, 'channels');
+  await retractTarget(page, 'beta').selectOption('app-old');
+  await page.locator('#appPlatform').selectOption('windows');
+  await expect(retractTarget(page, 'beta')).toBeEnabled();
+  await expect(retractTarget(page, 'beta')).toHaveValue('');
+  await expect(retractTarget(page, 'beta').locator('option[value="app-old"]')).toHaveCount(0);
+  await retractTarget(page, 'beta').selectOption('win-app-old');
+  await retractAction(page, 'beta').click(); await confirm(page);
+  await expect(page.locator('#confirmTitle')).toHaveText('Rollback completed');
+  expect(data.writes[0].body).toMatchObject({ platform: 'windows', releaseId: 'win-app-old', rollback: true });
+  await closeResult(page);
+  await page.locator('#appPlatform').selectOption('ios');
+  await expect(page.locator('#refreshButton')).toBeEnabled();
+  await expect(page.locator('#appPlatformHint')).toContainText('not configured');
+  await expect(page.locator('[data-app-retract]')).toHaveCount(0);
+  await page.locator('#appPlatform').selectOption('android');
+  await expect(retractTarget(page, 'beta')).toBeEnabled();
+  await expect(retractTarget(page, 'beta')).toHaveValue('');
+  expect(data.channels.find(row => row.name === 'beta' && row.platform === 'android')?.current_release_id).toBe('app-current');
+  expect(data.writes).toHaveLength(1);
+});
+
+test('App channel retraction blocks stale reads and requires explicit confirmation after a conflict', async ({ page }) => {
+  const data = await mockApp(page); await appTab(page, 'channels');
+  await retractTarget(page, 'beta').selectOption('app-old');
+  data.appReadFailure = true;
+  await page.locator('#refreshButton').click();
+  await expect(page.locator('#confirmMessage')).toContainText('BACKEND_UNAVAILABLE');
+  await closeResult(page);
+  await expect(retractTarget(page, 'beta')).toBeDisabled();
+  await expect(retractAction(page, 'beta')).toBeDisabled();
+  await expect(page.locator('#appChannelsNotice')).toBeVisible();
+  expect(data.writes).toHaveLength(0);
+  data.appReadFailure = false; await refreshApp(page);
+  await expect(retractTarget(page, 'beta')).toHaveValue('app-old');
+  data.conflict = true;
+  await retractAction(page, 'beta').click(); await confirm(page);
+  await expect(page.locator('#confirmDetail')).toContainText('CAS_CONFLICT');
+  await closeResult(page);
+  await expect(retractAction(page, 'beta')).toBeDisabled();
+  expect(data.writes).toHaveLength(1); expect(data.mutations).toBe(0);
+  await refreshApp(page);
+  await retractAction(page, 'beta').click(); expect(data.writes).toHaveLength(1);
+  await confirm(page); await expect(page.locator('#confirmTitle')).toHaveText('Rollback completed');
+  expect(data.writes[1].body.expectedRevision).toBe(9);
+  expect(data.writes).toHaveLength(2); expect(data.mutations).toBe(1);
+});
+
+test('App channel retraction rejects an actor change during CSRF renewal without a POST', async ({ page }) => {
+  const data = await mockApp(page); await appTab(page, 'channels');
+  await retractTarget(page, 'beta').selectOption('app-old');
+  await retractAction(page, 'beta').click();
+  data.actor = 'different-owner@example.test';
+  await confirm(page);
+  await expect(page.locator('#confirmTitle')).toHaveText('Rollback not confirmed');
+  await expect(page.locator('#confirmDetail')).toContainText('signed-in account changed');
+  expect(data.writes).toHaveLength(0);
+});
+
+for (const language of ['en', 'zh']) for (const width of [1440, 320]) {
+  test(`App channel retraction ${language} ${width}px keeps long content and enlarged controls reachable`, async ({ page }, info) => {
+    await page.setViewportSize({ width, height: 480 });
+    const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+    const data = await mockApp(page, language);
+    data.releases[1].release_tag = 'long-current-release-'.repeat(20);
+    data.releases[2].version_name = 'long-target-version-'.repeat(15);
+    data.releases.push(...Array.from({ length: 40 }, (_, i) => release(`many-old-${i}`, 40 + i)));
+    await refreshApp(page); await appTab(page, 'channels');
+    await page.addStyleTag({ content: '#appChannelsPanel h3, #appChannelsPanel label, #appChannelsPanel button, #appChannelsPanel select {font-size:24px!important;line-height:1.5}' });
+    await retractTarget(page, 'stable').selectOption('app-old');
+    await retractAction(page, 'stable').scrollIntoViewIfNeeded();
+    await expect(retractAction(page, 'stable')).toBeInViewport({ ratio: 1 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const clipped = await page.locator('#appChannelsPanel').evaluate(root => [...root.querySelectorAll<HTMLElement>('article, label, button')]
+      .filter(node => node.scrollWidth > node.clientWidth + 2).map(node => node.tagName));
+    expect(clipped).toEqual([]);
+    await page.screenshot({ path: info.outputPath('app-channel-retraction.png'), fullPage: true });
+    await retractAction(page, 'stable').click();
+    await expect(page.locator('#confirmCancel')).toBeInViewport({ ratio: 1 });
+    await page.locator('#confirmCancel').click();
+    await expect(retractAction(page, 'stable')).toBeFocused();
+    expect(errors).toEqual([]); expect(data.writes).toHaveLength(0);
+  });
 }
 
 test("App rollback flag reaches the existing API", async ({ page }) => {
@@ -918,7 +1142,7 @@ async function refreshApp(page: Page) {
   await page.locator("#refreshButton").click();
   await expect(page.locator("#refreshButton")).toBeEnabled();
 }
-async function appTab(page: Page, section: "releases" | "announcements") {
+async function appTab(page: Page, section: "releases" | "channels" | "announcements") {
   await page.locator('[data-app-section="' + section + '"]').click();
   await expect(page.locator('[data-app-section="' + section + '"]')).toHaveAttribute("aria-selected", "true");
 }
@@ -1026,6 +1250,9 @@ test("interaction App tabs support arrow keys and independent search without los
   await page.locator("#searchInput").fill("mock-app-100");
   await page.locator("#appReleasesTab").focus();
   await page.keyboard.press("ArrowRight");
+  await expect(page.locator("#appChannelsTab")).toBeFocused();
+  await expect(page.locator("#searchInput")).toHaveValue("");
+  await page.locator("#appChannelsTab").press("ArrowRight");
   await expect(page.locator("#appAnnouncementsTab")).toBeFocused();
   await expect(page.locator("#searchInput")).toHaveValue("");
   await page.locator("#searchInput").fill("Notice 7");
